@@ -27,7 +27,7 @@ cd python-ai-workshop-students
 |---|---|
 | Data and regression | Inspect a synthetic dataset, fit a line, and explain a held-out prediction |
 | Tool-using chatbot | Trace a validated Python tool call, then add and test a FAQ topic |
-| Project discussion | Distinguish today's notebook from a proposed deployed assistant |
+| Teach-back | Explain which work belongs to the data, model, and Python application |
 
 The core statistics path is **S1, S2, S4–S7**; S3 distributions is optional. In the chatbot notebook, follow **A1–A5**, including the guided **A4b** contact exercise. Live API and interactive cells are optional and disabled by default.
 
@@ -40,8 +40,8 @@ The core statistics path is **S1, S2, S4–S7**; S3 distributions is optional. I
 - `src/test_offline.py`: installation and offline behavior check.
 - `data/study_hours.csv`: synthetic teaching data, not real student information.
 - `requirements.txt`: dependencies for Python 3.11 or 3.12.
-- `Architecture.md` and `Architecture.svg`: proposed project architecture for discussion and E6.
+- `Architecture.md` and `Architecture.svg`: teaching diagrams for tracing a tool-call cycle in E6.
 
-The offline chatbot is scripted keyword matching, **not an LLM**. The optional live path uses an API model. Document retrieval, a browser app, authentication, and hosting are proposed work, not implemented features.
+The offline chatbot is scripted keyword matching, **not an LLM**. The optional live path uses an API model. This is a notebook-based teaching demo; you do not need to build or host an application.
 
 This student pack intentionally excludes the instructor guide, presentation, and answer key. Keep API keys and personal information out of notebooks, screenshots, and GitHub uploads.

@@ -108,7 +108,7 @@ Follow the instructor rather than running ahead:
 | 50–67 | A1–A4; read the tool trace |
 | 67–75 | A4b; add and test your contact topic |
 | 75–80 | A5; inspect boundary checks |
-| 80–90 | Architecture discussion, recap, and homework |
+| 80–90 | Partner teach-back, recap, and homework |
 
 ### Contact exercise: why restarting matters
 

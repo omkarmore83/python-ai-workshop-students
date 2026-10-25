@@ -1,72 +1,51 @@
-# Chindi Chat Agent architecture
+# Understand one tool-using chatbot turn
 
-This is a proposed reference architecture for a beginner project. Today’s runnable prototype uses a fixed FAQ dictionary. Retrieval, a web UI, and hosted deployment are implementation milestones, not features already present in the notebook.
+This is a teaching map of the code in `src/agent.py`, not a product architecture or deployment plan. Read it alongside A1–A5 in the chatbot notebook.
 
-## Assumptions to confirm
+## The main idea
 
-ASSUMPTION A1: Chindi Chat Agent is a text chatbot answering questions from an approved FAQ or document collection. The name alone does not establish its domain or languages.
-
-ASSUMPTION A2: The first pilot serves a small group of interns, with read-only tools. It does not send messages, accept payments, or change business records.
-
-ASSUMPTION A3: Internet access and a hosted LLM API are allowed. Confirm provider, region, budget, data handling, and model access before using real documents.
-
-ASSUMPTION A4: English is sufficient for the first prototype. Confirm whether Hindi, Marathi, or other languages are required. Do not assume multilingual quality from a model name.
-
-ASSUMPTION A5: Conversations need only in-memory storage for the workshop. Confirm retention, authentication, and access requirements for a pilot.
-
-## Proposed component diagram
+The model proposes a tool call. The Python application validates and executes it. The tool result goes back into the messages, and another model round can produce the final answer.
 
 ```mermaid
 flowchart TD
- U[Browser chat UI] -->|HTTPS question and session ID| B[Python backend and session handling]
- B --> A[Bounded agent loop]
- A -->|Messages and tool schema| L[Hosted LLM API]
- L -->|Text or proposed tool call| A
- A --> V[Tool allowlist and argument validation]
- V --> R[Read only FAQ or retrieval tool]
- R --> D[Approved source documents]
- R -->|Tool result and source IDs| A
- A -->|Final answer| B
- B -->|Answer and sources| U
- S[Server secret store] -.-> B
- B --> M[Redacted logs and evaluation metrics]
+    U[User asks: When is the workshop?] --> A[Chatbot.ask adds the user message]
+    A --> M[Call the model with the messages]
+    M --> D{Tool calls requested?}
+    D -->|No| F[Commit completed history and return the answer]
+    D -->|Yes| V[Python dispatch validates the name and JSON arguments]
+    V --> T[Read the approved FAQ or return an explicit error]
+    T --> R[Append each tool result with its matching call ID]
+    R --> M
 ```
 
-The tool result returns to the model through the next agent-loop API request. Diagram arrows show data flow, not a separate direct connection from the tool to the provider. Today’s dictionary implements the read-only FAQ component. The notebook has no browser, HTTP server, authentication, retrieval index, or secret store.
+`Chatbot.ask` permits four model rounds by default. If no final answer arrives within that limit, it raises an error instead of looping forever. A model response can request multiple tools; each gets a result before the next round.
 
-## Component responsibilities
+## Follow the example
 
-The browser collects questions and shows answers. It never receives the API credential. The backend validates request size, authenticates pilot users, separates sessions, and owns conversation lifetime. The agent loop sends context and schemas, executes approved tool calls, and stops on a final answer or round limit. The LLM proposes text and tool calls but does not directly execute Python.
+| Step | What happens | Who does the work? |
+|---|---|---|
+| 1 | Ask "When is the workshop?" | User |
+| 2 | Propose `lookup_faq` with `{"topic":"schedule"}` | Model function |
+| 3 | Validate the tool name, parsed JSON shape, and approved topic | Python dispatcher |
+| 4 | Read the schedule and append a result linked by `tool_call_id` | Python application |
+| 5 | Use the result to produce the answer | Another model round |
 
-The tool dispatcher validates function names and inputs. A future retrieval tool searches only approved sources that the current user may access and returns short snippets plus document identifiers. Document ingestion should preserve title, version, and access labels. Retrieved text is untrusted data and cannot grant permissions. The final answer should cite sources or say when the available documents do not answer the question. Source citations still need evaluation for correctness.
+The two assistant messages have different jobs: first request work, then answer using the result.
 
-A secret store supplies credentials to the server. Monitoring records request IDs, duration, error type, token usage, and tool success without storing secrets or unnecessary personal data. Cost controls should cap input length, model rounds, output tokens, request rate, and daily usage. The classroom code only implements some of these controls.
+## Offline versus live
 
-## Deployment options
+The default `offline_model` uses keyword rules and a special "when" rule. It does not run a language model or understand arbitrary paraphrases. `live_model` optionally calls a hosted model API. Both use the same message loop and Python dispatcher.
 
-| Option | Best use | What to add | Tradeoff |
-|---|---|---|---|
-| Local Jupyter notebook | Workshop and debugging | Virtual environment | Not a shared service |
-| Local Streamlit interface | Small UI prototype | Per-session Chatbot object and local secrets | Local process must remain running |
-| Managed web hosting such as Azure App Service | Small pilot | Python HTTP backend, authentication, server secrets, session isolation, health checks | Hosting and API charges; configuration work |
-| Container on managed hosting | Repeatable team deployment | Container build, registry, deployment configuration, external session storage if scaled | More infrastructure for beginners |
+The dictionary is an approved data source, not a search engine. The schema describes permitted inputs, but Python must still validate them. A tool result is data, not permission to execute arbitrary instructions.
 
-Recommendation: notebook first, then a small managed web pilot after requirements are confirmed. Confirm current hosting support, pricing, and regional constraints during implementation. A deployment option is not a completed deployment.
+## What changes in the contact exercise?
 
-## Suggested milestones and acceptance checks
+You add one key and value to `FAQ`. On a fresh import, the topic schema derives from the dictionary keys, and the keyword matcher sees the new topic. Save, restart the kernel, rerun A1–A4, and enable the A4b check. No model weights are changed.
 
-M1 • Requirements, half day: identify audience, languages, allowed documents, data permissions, provider, budget, and pilot owner. Acceptance: one-page agreed scope and ten representative questions with reviewed answers.
+## Questions to explain to a partner
 
-M2 • Offline prototype, half day: run the supplied chatbot and add one FAQ topic. Acceptance: valid calls, unknown tools, malformed JSON, unsupported topics, and loop limit tests pass.
-
-M3 • Live API integration, half to one day: select a tool-capable model and configure server credentials. Acceptance: reviewed questions produce correct tool use, authentication failures do not leak secrets, and request limits apply. Live behavior is nondeterministic, so evaluate facts and tool use rather than exact wording.
-
-M4 • Approved retrieval, one to two days: ingest a small versioned document set and return snippets with source IDs. Acceptance: answers cite the right sources, unsupported questions receive an appropriate uncertainty response, and unauthorized documents never appear.
-
-M5 • Authenticated pilot, one to two days: add a web interface and backend, isolate sessions, configure hosting and logging. Acceptance: two users cannot see each other’s history, secrets stay on the server, errors are actionable, and the owner can inspect latency and usage.
-
-M6 • Evaluation and iteration, ongoing: expand the reviewed question set to cover ambiguity, out-of-scope questions, and hostile instructions in documents. Set a correctness threshold with the project owner before release. Estimates are teaching suggestions, not delivery commitments.
-
-## Decisions before real deployment
-
-Who uses Chindi, and what problem does it solve? Which languages and documents matter? May the service store conversations? Which region and identity system should it use? Who reviews incorrect answers? Which actions, if any, need human approval? Confirm these before choosing production components.
+1. Why are there two assistant messages in a simple tool-using turn?
+2. What connects a tool result to its request?
+3. What happens when the tool name or topic is invalid?
+4. Why is saved conversation history not the same as model training?
+5. Why does the loop need a stopping rule even when all requested tools are valid?

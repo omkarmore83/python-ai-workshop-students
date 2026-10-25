@@ -3,7 +3,7 @@ import json, os
 FAQ = {
     "schedule": "Workshop: Monday October 26, 2026, 90 minutes. Start time is not specified.",
     "setup": "Use Python 3.11 or 3.12 and install requirements.txt in a virtual environment.",
-    "homework": "Add a new FAQ topic, test it, and explain one deployment choice."
+    "homework": "Add a new FAQ topic, test it, and explain one tool-call cycle."
 }
 TOOLS = [{"type": "function", "function": {
     "name": "lookup_faq", "description": "Look up a workshop FAQ topic.",

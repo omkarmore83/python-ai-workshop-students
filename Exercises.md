@@ -31,9 +31,11 @@ Expected: a contact tool trace followed by `Contact extension passed`. If time i
 
 Homework (10–15 minutes): add checks for an unsupported topic and malformed JSON. Explain one limitation of the keyword matcher. Leave A4b enabled only after adding the topic; the supplied notebook skips the extension check by default.
 
-## E6   Homework   10 to 15 minutes   Propose Chindi scope
+## E6   Homework   10 to 15 minutes   Explain the chatbot without jargon
 
-Write five representative user questions and mark which the current FAQ can answer. Choose one deployment option from Architecture.md. Identify three assumptions that must be confirmed. Describe where credentials and session history belong.
+Draw the cycle in your own words: user question, assistant tool request, Python validation and lookup, tool result, final assistant answer. Use Architecture.md as a reference only after trying it yourself.
+
+Write five questions and mark which the current FAQ can answer in offline mode. Include one unsupported topic. Explain why storing conversation messages does not make the keyword matcher understand every follow-up. Finally, explain what changed when you added contact, and why that was not model training.
 
 ## E7   Optional advanced   20 minutes   Residuals and baseline
 
